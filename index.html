@@ -159,13 +159,13 @@
         <div class="sidebar">
             <div class="step-info step1-info">
                 <h3>1단계: 나의 주장</h3>
-                <p>나의 핵심 근거와 주장을 노란 포스트잇에 적으세요.</p>
+                <p>주장에 대한 이유와 근거를 노란 포스트잇에 적으세요.</p>
             </div>
             <button class="btn-spawn" id="btn-s1">+ 노란 포스트잇 생성</button>
 
             <div class="step-info step2-info">
                 <h3>2단계: 심술쟁이 태클</h3>
-                <p>짝꿍 보드로 가거나 역할을 바꿔 "비용/부작용/효과 부족" 태클을 거세요.</p>
+                <p>짝꿍 보드로 가거나 역할을 바꿔 "형평성/부작용/비용증가/자율성침해/효과 부족" 태클을 거세요.</p>
             </div>
             <button class="btn-spawn" id="btn-s2">+ 핑크 태클 포스트잇</button>
 
@@ -206,11 +206,11 @@
             if (type === 's1') {
                 note.classList.add('s1-note');
                 label = '🟡 1단계: 주장';
-                placeholder = '나의 주장과 이유와 근거를 적어줘!';
+                placeholder = '주장에 대한 나의 이유와 근거를 적어줘!';
             } else if (type === 's2') {
                 note.classList.add('s2-note');
                 label = '🔴 2단계: 태클(반론)';
-                placeholder = '근데 그거 돈 들잖아! 부작용은 어쩌고?';
+                placeholder = '[태클 힌트!]\n- 비용 증가\n- 부작용 발생\n- 형평성 문제\n- 자율성 침해\n- 효과성 부족\n면으로 태클을 걸어봐!';
             } else {
                 note.classList.add('s3-note');
                 label = '🟢 3단계: 재반박';
