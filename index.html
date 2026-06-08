@@ -206,7 +206,7 @@
             if (type === 's1') {
                 note.classList.add('s1-note');
                 label = '🟡 1단계: 주장';
-                placeholder = '나의 주장과 근거를 적어줘!';
+                placeholder = '나의 주장과 이유와 근거를 적어줘!';
             } else if (type === 's2') {
                 note.classList.add('s2-note');
                 label = '🔴 2단계: 태클(반론)';
@@ -225,7 +225,7 @@
                 <textarea placeholder="${placeholder}"></textarea>
             `;
 
-            // 스폰 위치 무작위 살끔 주기 (중앙 배치)
+            // 스폰 위치 무작위 살짝 주기 (중앙 배치)
             const randomX = Math.random() * 100 + 150;
             const randomY = Math.random() * 100 + 100;
             note.style.left = randomX + 'px';
