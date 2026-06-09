@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>토론 브레인스토밍: 3단계 포스트잇 보드</title>
+    <!-- 화면을 이미지로 변환해주는 외부 라이브러리 추가 -->
+    <script src="https://cloudflare.com"></script>
+    <style>
+        :root {
+            --bg-color: #f4f6f9;
+            --step1-color: #fff9c4; /* 1단계 포스트잇 색상 */
+            --step2-color: #ffcdd2; /* 2단계 포스트잇 색상 */
+            --step3-color: #c8e6c9; /* 3단계 포스트잇 색상 */
+        }
+        body {
+            font-family: 'Nanum Gothic', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-color);
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+        header {
+            background-color: #2c3e50;
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        h1 { margin: 0; font-size: 1.5rem; }
+        select {
+            padding: 8px 12px;
+            font-size: 1rem;
+            border-radius: 5px;
+            border: none;
+            outline: none;
+            font-weight: bold;
+        }
+        .main-container {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+        .sidebar {
+            width: 280px;
+            background-color: #34495e;
+            color: white;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+            overflow-y: auto;
+        }
+        .step-info {
+            background-color: rgba(255,255,255,0.1);
+            padding: 12px;
+            border-radius: 6px;
+            border-left: 5px solid #fff;
+        }
+        .step-info h3 { margin: 0 0 5px 0; font-size: 1rem; }
+        .step-info p { margin: 0; font-size: 0.85rem; color: #ccc; line-height: 1.4; }
+        .step1-info { border-left-color: #f1c40f; }
+        .step2-info { border-left-color: #e74c3c; }
+        .step3-info { border-left-color: #2ecc71; }
+        
+        .btn-spawn {
+            padding: 12px;
+            font-size: 1rem;
+            font-weight: bold;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.2s;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+        #btn-s1 { background-color: #fff59d; }
+        #btn-s2 { background-color: #ef9a9a; }
+        #btn-s3 { background-color: #a5d6a7; }
+        .btn-spawn:hover { opacity: 0.9; transform: scale(1.02); }
+
+        /* 저장하기 버튼 스타일 */
+        .btn-save-board {
+            margin-top: auto; /* 사이드바 맨 밑으로 강제 배치 */
+            background-color: #e67e22;
+            color: white;
+            padding: 14px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.15);
+            transition: background 0.2s, transform 0.1s;
+        }
+        .btn-save-board:hover { background-color: #d35400; transform: scale(1.02); }
+
+        .board {
+            flex: 1;
+            position: relative;
+            background-image: radial-gradient(#bdc3c7 1px, transparent 1px);
+            background-size: 20px 20px;
+            overflow: auto;
+            background-color: var(--bg-color);
+        }
+
+        /* 포스트잇 스타일 */
+        .sticky-note {
+            position: absolute;
+            width: 190px;
+            height: 190px;
+            padding: 15px;
+            box-shadow: 3px 3px 10px rgba(0,0,0,0.15);
+            cursor: move;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            box-sizing: border-box;
+            border-radius: 2px;
+            transition: transform 0.1s;
+        }
+        .sticky-note:active { transform: scale(1.05); box-shadow: 5px 5px 15px rgba(0,0,0,0.2); }
+        .sticky-note textarea {
+            width: 100%;
+            height: 120px;
+            border: none;
+            background: transparent;
+            resize: none;
+            outline: none;
+            font-family: inherit;
+            font-size: 0.95rem;
+            font-weight: bold;
+            color: #333;
+            line-height: 1.4;
+        }
+        .note-header {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.75rem;
+            color: #666;
+            font-weight: bold;
+            margin-bottom: 5px;
+            user-select: none;
+        }
+        .btn-delete {
+            cursor: pointer;
+            color: #999;
+        }
+        .btn-delete:hover { color: #e74c3c; }
+
+        .s1-note { background-color: var(--step1-color); border-top: 5px solid #f1c40f; }
+        .s2-note { background-color: var(--step2-color); border-top: 5px solid #e74c3c; }
+        .s3-note { background-color: var(--step3-color); border-top: 5px solid #2ecc71; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>💥 3단계 포스트잇 브레인스토밍 보드 💥</h1>
+        <div>
+            <label for="topic-select" style="color: white; font-weight: bold; margin-right: 10px;">토론 논제 선택:</label>
+            <select id="topic-select">
+                <option>1. 학교 내 휴대폰 사용을 허용해야 한다.</option>
+                <option>2. 학교는 현장체험학습을 확대해야 한다.</option>
+                <option>3. 학교는 CCTV 설치를 확대해야 한다.</option>
+                <option>4. 학교폭력 방관자도 책임을 져야 한다.</option>
+                <option>5. 비행학생의 퇴학조치는 바람직하다.</option>
+            </select>
+        </div>
+    </header>
+
+    <div class="main-container">
+        <!-- 사이드바 제어판 (텍스트에서 '노란, 핑크, 연두' 단어 완벽 삭제) -->
+        <div class="sidebar">
+            <div class="step-info step1-info">
+                <h3>1단계: 나의 주장</h3>
+                <p>주장(찬성, 반대 선택)과 이유와 근거를 포스트잇에 적으세요. (입장 선택 후 이유와 근거 제시)</p>
+            </div>
+            <button class="btn-spawn" id="btn-s1">+ 주장 포스트잇 생성</button>
+
+            <div class="step-info step2-info">
+                <h3>2단계: 심술쟁이 태클</h3>
+                <p>짝꿍 보드로 가거나 역할을 바꿔 "형평성/부작용/비용증가/자율성침해/효과 부족" 태클을 거세요.</p>
+            </div>
+            <button class="btn-spawn" id="btn-s2">+ 태클 포스트잇 생성</button>
+
+            <div class="step-info step3-info">
+                <h3>3단계: 방어 및 재반박</h3>
+                <p>상대방 태클 밑에 철벽 방어하는 재반박 문장을 완성하세요.</p>
+            </div>
+            <button class="btn-spawn" id="btn-s3">+ 재반박 포스트잇 생성</button>
+
+            <!-- 📸 활동 저장하기 버튼 -->
+            <button class="btn-save-board" id="btn-save">📸 활동 보드 저장하기</button>
+        </div>
+
+        <!-- 포스트잇이 배치되는 메인 캔버스 보드 -->
+        <div class="board" id="board"></div>
+    </div>
+
+    <script>
+        const board = document.getElementById('board');
+        const topicSelect = document.getElementById('topic-select');
+        
+        // 버튼 이벤트 바인딩 내부 구조 전면 재점검 및 정상 복구
+        document.getElementById('btn-s1').addEventListener('click', () => createNote('s1'));
+        document.getElementById('btn-s2').addEventListener('click', () => createNote('s2'));
+        document.getElementById('btn-s3').addEventListener('click', () => createNote('s3'));
+        
+        // 이미지 저장하기 전용 함수 오류 완전 해결
+        document.getElementById('btn-save').addEventListener('click', () => {
+            if (board.children.length === 0) {
+                alert("보드에 작성된 포스트잇이 없습니다!");
+                return;
+            }
+
+            html2canvas(board, {
+                useCORS: true,
+                scale: 2 
+            }).then(canvas => {
+                const link = document.createElement('a');
+                link.download = '토론활동_브레인스토밍.png'; 
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+            });
+        });
+
+        // 논제 변경 시 보드 초기화
+        topicSelect.addEventListener('change', () => {
+            if(confirm("논제를 변경하면 현재 보드의 포스트잇이 초기화됩니다. 변경하시겠습니까?")) {
+                board.innerHTML = '';
+            }
+        });
+
+        // 포스트잇 생성 함수 내부 텍스트 정리
+        function createNote(type) {
+            const note = document.createElement('div');
+            note.classList.add('sticky-note');
+            
+            let label = '';
+            let placeholder = '';
+            if (type === 's1') {
+                note.classList.add('s1-note');
+                label = '📢 1단계: 나의 주장';
+                placeholder = '[입장 선택]\n- 찬성 / 반대\n\n나의 주장과 이유와 근거를 명확하게 적어줘!';
+            } else if (type === 's2') {
+                note.classList.add('s2-note');
+                label = '🔥 2단계: 반론 태클';
+                placeholder = '[태클 힌트!]\n- 형평성 문제\n- 부작용 발생\n- 비용 증가\n- 자율성 침해\n- 효과 부족\n면으로 강력한 태클을 걸어봐!';
+            } else {
+                note.classList.add('s3-note');
+                label = '🛡️ 3단계: 재반박';
+                placeholder = '상대방 태클을 무력화할 방어 문장 작성!';
+            }
+
+            note.innerHTML = `
+                <div class="note-header">
+                    <span>${label}</span>
+                    <span class="btn-delete" onclick="this.parentElement.parentElement.remove()">❌</span>
+                </div>
+                <textarea placeholder="${placeholder}"></textarea>
+            `;
+
+            const randomX = Math.random() * 100 + 150;
+            const randomY = Math.random() * 100 + 100;
+            note.style.left = randomX + 'px';
+            note.style.top = randomY + 'px';
+
+            makeDraggable(note);
+            board.appendChild(note);
+        }
+
+        function makeDraggable(element) {
+            let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+            element.onmousedown = dragMouseDown;
+
+            function dragMouseDown(e) {
+                if (e.target.tagName === 'TEXTAREA' || e.target.classList.contains('btn-delete')) return;
