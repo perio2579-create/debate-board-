@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI 논증 코치</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react/17.0.2/umd/react.production.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/17.0.2/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/lucide-react/dist/lucide-react.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Malgun+Gothic:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Malgun Gothic', sans-serif;
+            background-color: #F9FAFB;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+        header {
+            background: white;
+            padding: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        main {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        footer {
+            background: white;
+            padding: 1rem;
+            border-top: 1px solid #E5E7EB;
+        }
+        .button {
+            background: #4F46E5;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        .button:hover {
+            background: #4338CA;
+        }
+        .message {
+            padding: 1rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        }
+        .user-message {
+            background: #4F46E5;
+            color: white;
+            align-self: flex-end;
+        }
+        .ai-message {
+            background: white;
+            color: black;
+            align-self: flex-start;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>AI 논증 코치</h1>
+    <select id="stageSelect">
+        <option value="0">[0단계] 진짜 이유 찾기</option>
+        <option value="1">[1단계] 주장과 이유 구분하기</option>
+        <option value="2">[2단계] 이유와 근거 구분하기</option>
+        <option value="3">[3단계] 이유와 근거 연결하기</option>
+    </select>
+</header>
+
+<main id="messageContainer"></main>
+
+<footer>
+    <form id="userInputForm">
+        <input type="text" id="userInput" placeholder="비밀 열쇠(10글자 요약)를 입력해봐!" required>
+        <button type="submit" class="button">전송</button>
+    </form>
+</footer>
+
+<script>
+    const TOPICS = [
+        "학교에서 휴대폰 사용을 허용해야 한다.",
+        "학교는 체험학습을 확대해야 한다.",
+        "학교는 CCTV 설치를 확대해야 한다.",
+        "비행학생의 퇴학조치는 바람직하다.",
+        "학교폭력 방관자도 책임을 져야 한다."
+    ];
+
+    const STAGE_TIPS = [
+        "[0단계 핵심 비법 💡] 좋은 이유는 '좋다', '싫다' 같은 단순한 감정이나 반응이 아니야.",
+        "[1단계 핵심 비법 💡] 주장과 이유를 구분해볼 거야!",
+        "[2단계 핵심 비법 💡] 이유와 근거를 확실하게 구분해볼 거야!",
+        "[3단계 핵심 비법 💡] 이유에 맞는 근거를 찾아 연결하는 단계야!"
+    ];
+
+    const PROBLEM_BANK = {
+        0: [
+            { topic: 0, question: "친구의 말을 보고, 이것이 단순한 반응인지 논제와 연결되는 진짜 이유인지 골라볼래?\n\n\"휴대폰을 못 쓰게 하면 너무 답답하고 짜증 나요.\"", options: ["단순한 반응", "진짜 이유"], answer: 0 },
+            // 나머지 문제들을 여기에 추가하세요.
+        ],
+        // 다른 단계의 문제들도 여기에 추가하세요.
+    };
+
+    let stage = 0;
+    let currentProblemIndex = 0;
+
+    const messageContainer = document.getElementById('messageContainer');
+
+    const addMessage = (text, sender) => {
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `message ${sender}-message`;
+        messageDiv.textContent = text;
+        messageContainer.appendChild(messageDiv);
+        messageContainer.scrollTop = messageContainer.scrollHeight; // 자동 스크롤
+    };
+
+    const askProblem = (stage) => {
+        const problem = PROBLEM_BANK[stage][currentProblemIndex];
+        addMessage(`[논제] ${TOPICS[problem.topic]}\n\n${problem.question}`, 'ai');
+    };
+
+    const startGame = () => {
+        addMessage("안녕! 논증 코치를 시작할게!", 'ai');
+        addMessage(STAGE_TIPS[stage], 'ai');
+        askProblem(stage);
+    };
+
+    document.getElementById('userInputForm').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const userInput = document.getElementById('userInput').value;
+        addMessage(userInput, 'user');
+        document.getElementById('userInput').value = '';
+        
+        // 여기에서 사용자의 입력을 처리하고 정답 확인 로직을 추가할 수 있습니다.
+    });
+
+    document.getElementById('stageSelect').addEventListener('change', (e) => {
+        stage = Number(e.target.value);
+        currentProblemIndex = 0;
+        messageContainer.innerHTML = ''; // 메시지 초기화
+        startGame();
+    });
+
+    startGame(); // 게임 시작
+</script>
+
+</body>
+</html>
